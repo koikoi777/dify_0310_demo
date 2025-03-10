@@ -4,12 +4,12 @@ import { useState } from 'react';
 import WorkflowRunner from './components/WorkflowRunner';
 
 export default function Home() {
-  // 用途選択オプション（execution_optionを追加）
+  // Dify側の設定に合わせた用途選択オプション
   const purposeOptions = [
-    { value: 'time_series', label: '時系列順にまとめる', execution_option: 'time_series' },
-    { value: 'agenda_based', label: '議題ごとにまとめる', execution_option: 'agenda_based' },
-    { value: 'action_items', label: 'アクションアイテムを抽出する', execution_option: 'action_items' },
-    { value: 'summary', label: '要約する', execution_option: 'summary' }
+    { value: 'summary', label: '要約する', execution_option: '要約する' },
+    { value: 'time_series', label: '時系列順にまとめる', execution_option: '時系列順にまとめる' },
+    { value: 'verbatim', label: '全体を逐語訳する', execution_option: '全体を逐語訳する' },
+    { value: 'action_items', label: 'ステークホルダー別のネクストアクションを整理', execution_option: 'ステークホルダー別のネクストアクションを整理' }
   ];
 
   return (
@@ -21,7 +21,7 @@ export default function Home() {
             議事録複数パターン処理
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            アップロードした議事録を、時系列順、議題ごと、アクションアイテム抽出、要約など様々な形式で整理できます
+            アップロードした議事録を、時系列順、逐語訳、アクションアイテム抽出、要約など様々な形式で整理できます
           </p>
         </header>
         
@@ -44,7 +44,7 @@ export default function Home() {
                 </li>
                 <li>
                   <span className="font-medium">処理方法を選択</span>
-                  <p className="text-sm text-gray-600">時系列順、議題ごと、アクションアイテム抽出、要約から選択してください。</p>
+                  <p className="text-sm text-gray-600">要約、時系列順、逐語訳、アクションアイテム抽出から選択してください。</p>
                 </li>
                 <li>
                   <span className="font-medium">実行ボタンをクリック</span>
@@ -62,20 +62,20 @@ export default function Home() {
               <h3 className="text-lg font-medium mb-3 text-primary-color">処理方法の説明</h3>
               <div className="space-y-3">
                 <div className="p-3 bg-white border-l-4 border-primary-color rounded-r-md shadow-sm">
+                  <h4 className="font-medium">要約する</h4>
+                  <p className="text-sm text-gray-600">議事録の内容を簡潔に要約します。</p>
+                </div>
+                <div className="p-3 bg-white border-l-4 border-primary-color rounded-r-md shadow-sm">
                   <h4 className="font-medium">時系列順にまとめる</h4>
                   <p className="text-sm text-gray-600">議事録を時間の流れに沿って整理します。</p>
                 </div>
                 <div className="p-3 bg-white border-l-4 border-primary-color rounded-r-md shadow-sm">
-                  <h4 className="font-medium">議題ごとにまとめる</h4>
-                  <p className="text-sm text-gray-600">議事録を議題やトピックごとに分類して整理します。</p>
+                  <h4 className="font-medium">全体を逐語訳する</h4>
+                  <p className="text-sm text-gray-600">議事録の内容を詳細に書き起こします。</p>
                 </div>
                 <div className="p-3 bg-white border-l-4 border-primary-color rounded-r-md shadow-sm">
-                  <h4 className="font-medium">アクションアイテムを抽出する</h4>
-                  <p className="text-sm text-gray-600">議事録から次のアクションや課題を抽出します。</p>
-                </div>
-                <div className="p-3 bg-white border-l-4 border-primary-color rounded-r-md shadow-sm">
-                  <h4 className="font-medium">要約する</h4>
-                  <p className="text-sm text-gray-600">議事録の内容を簡潔に要約します。</p>
+                  <h4 className="font-medium">ステークホルダー別のネクストアクションを整理</h4>
+                  <p className="text-sm text-gray-600">議事録から関係者ごとのアクションアイテムを抽出して整理します。</p>
                 </div>
               </div>
             </div>
