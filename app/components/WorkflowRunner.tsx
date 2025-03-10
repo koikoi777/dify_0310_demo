@@ -82,6 +82,7 @@ export default function WorkflowRunner({ purposeOptions }: WorkflowRunnerProps) 
       }
 
       // ワークフロー実行
+      // APIエラーに基づいて、script_fileという名前でファイルを指定
       const workflowResponse = await fetch('/api/dify/workflow', {
         method: 'POST',
         headers: {
@@ -89,7 +90,7 @@ export default function WorkflowRunner({ purposeOptions }: WorkflowRunnerProps) 
         },
         body: JSON.stringify({
           inputs: {
-            meeting_minutes: {
+            script_file: {
               transfer_method: 'local_file',
               upload_file_id: fileId,
               type: 'document'
@@ -103,7 +104,8 @@ export default function WorkflowRunner({ purposeOptions }: WorkflowRunnerProps) 
 
       if (!workflowResponse.ok) {
         const errorData = await workflowResponse.json();
-        throw new Error(errorData.error || 'ワークフローの実行に失敗しました');
+        console.error('Workflow error details:', errorData);
+        throw new Error(errorData.message || errorData.error || 'ワークフローの実行に失敗しました');
       }
 
       const workflowData = await workflowResponse.json();
