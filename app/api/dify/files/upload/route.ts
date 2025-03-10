@@ -1,4 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+    import { NextRequest, NextResponse } from 'next/server';
+
+// APIのベースURLとAPIキーを直接指定（環境変数が読み込めない場合のフォールバック）
+const DIFY_API_URL = process.env.NEXT_PUBLIC_DIFY_API_URL || 'https://api.dify.ai/v1';
+const DIFY_API_KEY = process.env.NEXT_PUBLIC_DIFY_API_KEY;
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,14 +16,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // APIのURLとキーをログに出力（デバッグ用）
+    console.log('DIFY_API_URL:', DIFY_API_URL);
+    console.log('DIFY_API_KEY is set:', !!DIFY_API_KEY);
+
+    if (!DIFY_API_URL) {
+      return NextResponse.json(
+        { error: 'API URLが設定されていません' },
+        { status: 500 }
+      );
+    }
+
+    if (!DIFY_API_KEY) {
+      return NextResponse.json(
+        { error: 'APIキーが設定されていません' },
+        { status: 500 }
+      );
+    }
+
     // Dify APIにファイルをアップロード
     const uploadFormData = new FormData();
     uploadFormData.append('file', file);
     
-    const response = await fetch(`${process.env.DIFY_API_URL}/files/upload`, {
+    const response = await fetch(`${DIFY_API_URL}/files/upload`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.DIFY_API_KEY}`,
+        'Authorization': `Bearer ${DIFY_API_KEY}`,
       },
       body: uploadFormData,
     });

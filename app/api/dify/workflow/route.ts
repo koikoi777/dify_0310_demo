@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+    import { NextRequest, NextResponse } from 'next/server';
 
-// ワークフローID（環境変数から取得するか、APIキーに紐づいている場合は不要）
-const WORKFLOW_ID = 'f5f98718-2861-49ef-9407-0213d756b5d0';
+// APIのベースURLとAPIキーを直接指定（環境変数が読み込めない場合のフォールバック）
+const DIFY_API_URL = process.env.NEXT_PUBLIC_DIFY_API_URL || 'https://api.dify.ai/v1';
+const DIFY_API_KEY = process.env.NEXT_PUBLIC_DIFY_API_KEY;
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,12 +16,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // APIのURLとキーをログに出力（デバッグ用）
+    console.log('DIFY_API_URL:', DIFY_API_URL);
+    console.log('DIFY_API_KEY is set:', !!DIFY_API_KEY);
+
+    if (!DIFY_API_URL) {
+      return NextResponse.json(
+        { error: 'API URLが設定されていません' },
+        { status: 500 }
+      );
+    }
+
+    if (!DIFY_API_KEY) {
+      return NextResponse.json(
+        { error: 'APIキーが設定されていません' },
+        { status: 500 }
+      );
+    }
+
     // Dify APIにリクエスト
-    const response = await fetch(`${process.env.DIFY_API_URL}/workflows/${WORKFLOW_ID}/run`, {
+    // ワークフローIDは不要で、直接 /workflows/run エンドポイントを使用
+    const response = await fetch(`${DIFY_API_URL}/workflows/run`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DIFY_API_KEY}`,
+        'Authorization': `Bearer ${DIFY_API_KEY}`,
       },
       body: JSON.stringify({
         inputs,
@@ -33,16 +53,8 @@ export async function POST(req: NextRequest) {
       const errorData = await response.json();
       console.error('Dify API error:', errorData);
       
-      // 404エラーの場合、ワークフローIDが見つからない可能性がある
-      if (response.status === 404) {
-        return NextResponse.json(
-          { error: 'ワークフローIDが見つかりません。APIキーに紐づいているか確認してください。' },
-          { status: 404 }
-        );
-      }
-      
       return NextResponse.json(
-        { error: 'ワークフローの実行に失敗しました' },
+        { error: 'ワークフローの実行に失敗しました', details: errorData },
         { status: response.status }
       );
     }
