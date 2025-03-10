@@ -1,62 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
 
-// Dify APIのエンドポイント
-const DIFY_API_URL = process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
-const DIFY_API_KEY = process.env.DIFY_API_KEY;
+// ワークフローID（環境変数から取得するか、APIキーに紐づいている場合は不要）
+const WORKFLOW_ID = 'f5f98718-2861-49ef-9407-0213d756b5d0';
 
-/**
- * Dify APIのワークフローエンドポイントにリクエストを送信する
- */
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    // リクエストボディを取得
-    const { workflowId, inputs } = await request.json();
-
-    if (!workflowId) {
+    const body = await req.json();
+    const { inputs, response_mode = 'blocking', user = 'anonymous' } = body;
+    
+    if (!inputs) {
       return NextResponse.json(
-        { success: false, error: 'ワークフローIDが指定されていません' },
+        { error: '入力が見つかりません' },
         { status: 400 }
       );
     }
 
-    if (!DIFY_API_KEY) {
+    // Dify APIにリクエスト
+    const response = await fetch(`${process.env.DIFY_API_URL}/workflows/${WORKFLOW_ID}/run`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DIFY_API_KEY}`,
+      },
+      body: JSON.stringify({
+        inputs,
+        response_mode,
+        user,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Dify API error:', errorData);
+      
+      // 404エラーの場合、ワークフローIDが見つからない可能性がある
+      if (response.status === 404) {
+        return NextResponse.json(
+          { error: 'ワークフローIDが見つかりません。APIキーに紐づいているか確認してください。' },
+          { status: 404 }
+        );
+      }
+      
       return NextResponse.json(
-        { success: false, error: 'DIFY_API_KEYが設定されていません' },
-        { status: 500 }
+        { error: 'ワークフローの実行に失敗しました' },
+        { status: response.status }
       );
     }
 
-    // Dify APIリクエスト
-    const response = await axios.post(
-      `${DIFY_API_URL}/workflows/${workflowId}/run`,
-      {
-        inputs,
-        user: 'user-' + Date.now() // 一意のユーザーID
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${DIFY_API_KEY}`
-        }
-      }
-    );
-
-    // レスポンスの整形
-    return NextResponse.json({
-      success: true,
-      result: response.data.output || response.data.result || JSON.stringify(response.data, null, 2)
-    });
-
-  } catch (error: any) {
-    console.error('Dify API Error:', error.response?.data || error.message);
-    
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error running workflow:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error.response?.data?.message || error.message || 'ワークフロー実行中にエラーが発生しました' 
-      },
-      { status: error.response?.status || 500 }
+      { error: '内部サーバーエラー' },
+      { status: 500 }
     );
   }
 }

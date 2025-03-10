@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Dify ワークフロー連携',
-  description: 'Difyで作成したワークフローをAPIとして利用するフロントエンド',
+  title: '議事録処理アプリ',
+  description: 'Difyワークフローを使用した議事録処理アプリケーション',
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.className} bg-gray-100`}>{children}</body>
     </html>
   );
 }
